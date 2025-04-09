@@ -1,4 +1,7 @@
 # SmartCpp
+** To use this extension, Download the "SmartCpp" in VSCode Extenstions.
+![Screenshot 2025-04-09 231040](https://github.com/user-attachments/assets/0e2b3e7d-9b18-4166-86d7-938bb083c128)
+
 
 **SmartCpp** is a Visual Studio Code extension that helps you analyze C++ code, understand compiler errors, and fix them with ease.
 
