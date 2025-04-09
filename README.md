@@ -1,71 +1,79 @@
-# analyze README
+# SmartCpp
 
-This is the README for your extension "analyze". After writing up a brief description, we recommend including the following sections.
+**SmartCpp** is a Visual Studio Code extension that helps you analyze C++ code, understand compiler errors, and fix them with ease.
 
-## Features
+It guides developers through:
+- 📌 Clear explanations of errors  
+- 🧭 Step-by-step fixes  
+- 🛠️ Corrected versions of the code  
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+SmartCpp also features an **inbuilt compiler** that runs your code automatically. The goal is to streamline the debugging process so developers can focus on writing correct, clean, and understandable code—faster.
 
 ---
 
-## Following extension guidelines
+## 🚀 Features
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+- 🔍 Real-time C++ code error analysis
+- 💡 In-depth explanation of compiler errors
+- 🔧 Suggested code fixes with corrected examples
+- 🧠 Helps improve code readability and understandability
+- ⚙️ Built-in compiler to run and test code directly
+- ✅ One-stop solution for many C++ error-related issues
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+> SmartCpp enhances your development flow by minimizing time spent on debugging and maximizing time writing functional code.
 
-## Working with Markdown
+---
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+## 🔧 Requirements
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+- C++ environment set up on your system
+- VS Code version **1.98.0** or higher
 
-## For more information
+SmartCpp works out-of-the-box. No special configuration required.
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+---
 
-**Enjoy!**
+## ⚙️ Extension Settings
+
+This extension contributes the following settings:
+
+- `smartCpp.enable`: Enable/disable the SmartCpp extension.
+- `smartCpp.autoCompile`: Automatically compile the code on save.
+- `smartCpp.showFixes`: Show/hide inline suggestions and corrections.
+
+---
+
+## 🐞 Known Issues
+
+- May not catch all runtime or logical errors
+- Limited support for template-heavy and complex multi-file projects (coming soon!)
+
+---
+
+## 📦 Release Notes
+
+### 0.0.1
+
+- Initial release of SmartCpp
+- Support for:
+  - C++ error detection
+  - Basic explanations and fix suggestions
+  - Inline compiler integration
+
+---
+
+## 📘 Resources & Guidelines
+
+- [Extension Publishing Guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
+- [Extension Development Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+- [Markdown in VS Code](https://code.visualstudio.com/docs/languages/markdown)
+
+---
+
+## 💬 Support & Feedback
+
+Found a bug or have a feature request? Let us know on the [SmartCpp GitHub page](#) (link to your repo or issue tracker).
+
+---
+
+**Write smarter, debug faster. Choose SmartCpp.** 🚀
