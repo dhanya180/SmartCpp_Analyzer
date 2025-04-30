@@ -1,23 +1,26 @@
 import * as vscode from 'vscode';
 import { loadStore, saveStore, SnippetStore } from './store';
 
+// Main function to display the snippet manager UI in a Webview panel
 export function showSnippetPreview(context: vscode.ExtensionContext) {
+    // Create and show a new Webview panel
     const panel = vscode.window.createWebviewPanel(
-        'snippetPreview',
-        'Snippet Manager',
-        vscode.ViewColumn.One,
+        'snippetPreview', // Identifier for the Webview
+        'Snippet Manager', // Title of the Webview
+        vscode.ViewColumn.One, // Show in first editor column
+    {
         {
-            enableScripts: true,
-            retainContextWhenHidden: true
+            enableScripts: true, // Enable JavaScript in the Webview
+            retainContextWhenHidden: true // Retain context when hidden
         }
     );
-
+// Function to update the Webview HTML based on optional filter
     const updateWebview = (filterTag = '') => {
         const store = loadStore(context);
         panel.webview.html = getWebviewContent(store, filterTag);
     };
 
-    // Handle messages from the webview
+    // Listen for messages from the Webview
     panel.webview.onDidReceiveMessage(
         async (message) => {
             switch (message.command) {
@@ -53,9 +56,9 @@ export function showSnippetPreview(context: vscode.ExtensionContext) {
         context.subscriptions
     );
 
-    updateWebview();
+    updateWebview(); // Initial load of the Webview content
 }
-
+// Rename a tag (category) in the snippet store
 async function renameTag(context: vscode.ExtensionContext, oldTag: string, newTag: string) {
     if (!newTag || newTag.trim() === '') {
         vscode.window.showErrorMessage('Tag name cannot be empty');
@@ -69,31 +72,31 @@ async function renameTag(context: vscode.ExtensionContext, oldTag: string, newTa
             return;
         }
 
-        store[newTag] = store[oldTag];
-        delete store[oldTag];
-        await saveStore(context, store);
+        store[newTag] = store[oldTag]; // Copy snippets to new tag
+        delete store[oldTag]; // Delete old tag
+        await saveStore(context, store); // Save updated store
         vscode.window.showInformationMessage(`Tag renamed from "${oldTag}" to "${newTag}"`);
     }
 }
-
+// Delete a snippet by tag and index
 async function deleteSnippet(context: vscode.ExtensionContext, tag: string, index: number) {
-    const store = loadStore(context);
+    const store = loadStore(context); // Load the snippet store
     if (store[tag] && store[tag][index]) {
-        store[tag].splice(index, 1);
+        store[tag].splice(index, 1); // Remove the snippet from the array
         if (store[tag].length === 0) {
-            delete store[tag];
+            delete store[tag];  // Delete the tag if no snippets left
         }
-        await saveStore(context, store);
+        await saveStore(context, store); // Save the updated store
         vscode.window.showInformationMessage(`Snippet deleted from tag "${tag}"`);
     }
 }
-
+// Prompt user to edit a snippet and save the change
 async function editSnippet(context: vscode.ExtensionContext, tag: string, index: number) {
-    const store = loadStore(context);
+    const store = loadStore(context); // Load the snippet store
     if (store[tag] && store[tag][index]) {
         const newContent = await vscode.window.showInputBox({
             prompt: `Edit snippet in tag "${tag}"`,
-            value: store[tag][index]
+            value: store[tag][index] // Current snippet content
         });
         
         if (newContent !== undefined) {
@@ -103,26 +106,27 @@ async function editSnippet(context: vscode.ExtensionContext, tag: string, index:
         }
     }
 }
-
+// Save a snippet after it has been edited in the Webview
 async function saveEditedSnippet(context: vscode.ExtensionContext, tag: string, index: number, content: string) {
-    const store = loadStore(context);
+    const store = loadStore(context); // Load the snippet store
     if (store[tag] && store[tag][index]) {
-        store[tag][index] = content;
-        await saveStore(context, store);
+        store[tag][index] = content; // Update the snippet content
+        await saveStore(context, store); // Save the updated store
         vscode.window.showInformationMessage(`Snippet in tag "${tag}" updated`);
     }
 }
-
+// Generate the full HTML content of the Webview
 function getWebviewContent(store: SnippetStore, filterTag = ''): string {
+      // Filter tags by search term
     const filteredTags = Object.entries(store).filter(([tag]) => 
         filterTag === '' || tag.toLowerCase().includes(filterTag.toLowerCase())
     );
-
+  // Generate HTML for each snippet
     const snippetsHtml = filteredTags.map(([tag, snippets]) => {
         const snippetItems = snippets.map((snippet, index) => {
             const lines = snippet.split('\n');
-            const previewLines = lines.slice(0, 7);
-            const hasMore = lines.length > 7;
+            const previewLines = lines.slice(0, 7); // Show first 7 lines in preview
+            const hasMore = lines.length > 7; // Check if there are more lines to show
             
             return `
             <div class="snippet-item">
@@ -156,7 +160,7 @@ function getWebviewContent(store: SnippetStore, filterTag = ''): string {
             </div>
         `;
     }).join('');
-
+  // Final HTML output
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -448,7 +452,7 @@ function getWebviewContent(store: SnippetStore, filterTag = ''): string {
     </html>
     `;
 }
-
+// Utility to safely escape HTML characters to prevent XSS
 function escapeHtml(unsafe: string): string {
     return unsafe
         .replace(/&/g, "&amp;")
