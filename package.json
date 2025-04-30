@@ -1,9 +1,10 @@
 {
-  "name": "cpp-error-analyzer",
-  "displayName": "C++ Error Analyzer",
+  "name": "smartcpp-analyzer",
+  "displayName": "SmartCpp Analyzer",
   "description": "none",
+  "publisher": "smartCpp",
   "type": "commonjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -12,7 +13,10 @@
     "Linters"
   ],
   "activationEvents": [
-    "onLanguage:cpp"
+    "onLanguage:cpp",
+    "onCommand:extension.showDependencyGraph",
+    "onCommand:snippetTagger.saveSnippet",
+  "onCommand:snippetTagger.insertSnippet"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -20,6 +24,15 @@
       {
         "command": "extension.analyzeCode",
         "title": "Analyze C++ Code"
+      },
+      {
+        "command": "extension.showDependencyGraph",
+        "title": "Show Dependency Graph"
+      },
+      {
+        "command": "snippetTagger.showSnippetQuickPick",
+        "title": "Show Snippet Actions",
+        "category": "Snippet Tagger"
       }
     ],
     "configuration": {
@@ -54,12 +67,12 @@
     "@vscode/test-electron": "^2.4.1",
     "cpy-cli": "^5.0.0",
     "eslint": "^9.21.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vscode": "^1.1.37"
   },
   "dependencies": {
     "axios": "^1.8.4",
     "dotenv": "^16.4.7",
-    "node-fetch": "^3.3.2",
-    "vscode": "^1.1.37"
+    "node-fetch": "^3.3.2"
   }
 }
