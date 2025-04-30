@@ -3,81 +3,81 @@
 ![image](https://github.com/user-attachments/assets/52fae977-4f1b-4d85-af6e-1468b4a8255c)
 
 
+SmartCpp – Smarter C++ Debugging in VS Code
+SmartCpp is a powerful Visual Studio Code extension designed to simplify and accelerate your C++ development workflow. From real-time error analysis to guided fixes and a built-in compiler, SmartCpp helps you write correct, clean, and maintainable code—faster.
 
-**SmartCpp** is a Visual Studio Code extension that helps you analyze C++ code, understand compiler errors, and fix them with ease.
+🚀 Features
+🔍 Real-time Error Analysis
+Instantly highlights C++ compiler errors as you type
 
-It guides developers through:
-- 📌 Clear explanations of errors  
-- 🧭 Step-by-step fixes  
-- 🛠️ Corrected versions of the code  
+Understand issues with clear and concise error explanations
 
-SmartCpp also features an **inbuilt compiler** that runs your code automatically. The goal is to streamline the debugging process so developers can focus on writing correct, clean, and understandable code—faster.
+🧭 Step-by-Step Guided Fixes
+Get detailed, actionable fix suggestions
 
----
+View corrected versions of the problematic code
 
-## 🚀 Features
+⚙️ Built-in Compiler
+Auto-compiles code on save (optional)
 
-- 🔍 Real-time C++ code error analysis
-- 💡 In-depth explanation of compiler errors
-- 🔧 Suggested code fixes with corrected examples
-- 🧠 Helps improve code readability and understandability
-- ⚙️ Built-in compiler to run and test code directly
-- ✅ One-stop solution for many C++ error-related issues
+Run and test code directly within VS Code
 
-> SmartCpp enhances your development flow by minimizing time spent on debugging and maximizing time writing functional code.
+🧠 Improve Code Quality
+Focus on clean, readable, and correct code
 
----
+Learn from your mistakes through in-depth explanations
 
-## 🔧 Requirements
+📈 File Dependency Graph (NEW)
+Visualize your project's file and include relationships
 
-- C++ environment set up on your system
-- VS Code version **1.98.0** or higher
+Helps debug large codebases and track header dependencies
 
-SmartCpp works out-of-the-box. No special configuration required.
+💾 Smart Snippet Saver (NEW)
+Automatically saves frequently used code snippets
 
----
+Name and reuse snippets across projects
 
-## ⚙️ Extension Settings
+🖼️ Export to PNG (NEW)
+Export file graphs and key visuals as PNG for sharing or documentation
 
-This extension contributes the following settings:
+✅ Benefits
+Speeds up the debugging process
 
-- `smartCpp.enable`: Enable/disable the SmartCpp extension.
-- `smartCpp.autoCompile`: Automatically compile the code on save.
-- `smartCpp.showFixes`: Show/hide inline suggestions and corrections.
+Reduces context-switching by keeping fixes within VS Code
 
----
+Teaches better C++ practices while you code
 
-## 🐞 Known Issues
+🔧 Requirements
+C++ environment (compiler/toolchain) installed
 
-- May not catch all runtime or logical errors
-- Limited support for template-heavy and complex multi-file projects (coming soon!)
+Visual Studio Code version 1.98.0 or higher
 
----
+⚙️ Extension Settings
 
-## 📦 Release Notes
+Setting	Description
+smartCpp.enable	Enable or disable the extension
+smartCpp.autoCompile	Compile code automatically on save
+smartCpp.showFixes	Toggle inline error fixes and suggestions
+🐞 Known Issues
+May not catch all runtime or logical errors
 
-### 0.0.1
+Limited support for template-heavy or multi-file projects (Improved support coming soon!)
 
-- Initial release of SmartCpp
-- Support for:
-  - C++ error detection
-  - Basic explanations and fix suggestions
-  - Inline compiler integration
+📦 Release Notes
+0.0.2
+Added File Dependency Graph
 
----
+Introduced Smart Snippet Saver
 
-## 📘 Resources & Guidelines
+Support for PNG export
 
-- [Extension Publishing Guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
-- [Extension Development Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-- [Markdown in VS Code](https://code.visualstudio.com/docs/languages/markdown)
+0.0.1
+Initial release
 
----
+Real-time C++ error detection and basic fixes
 
-## 💬 Support & Feedback
+Inline compiler support
 
-Found a bug or have a feature request? Let us know on the [SmartCpp GitHub page](#) (link to your repo or issue tracker).
-
----
-
+💬 Feedback & Contributions
+Have feedback, feature requests, or want to contribute? We'd love to hear from you! Visit our GitHub repository or open an issue.
 **Write smarter, debug faster. Choose SmartCpp.** 🚀
