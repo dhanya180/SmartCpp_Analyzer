@@ -1,10 +1,10 @@
-# SmartCpp
+# SmartCpp Analyzer
 ** To use this extension, Download the "SmartCpp Analyzer" in VSCode Extenstions.
 ![image](https://github.com/user-attachments/assets/52fae977-4f1b-4d85-af6e-1468b4a8255c)
 
 
-SmartCpp – Smarter C++ Debugging in VS Code
-SmartCpp is a powerful Visual Studio Code extension designed to simplify and accelerate your C++ development workflow. From real-time error analysis to guided fixes and a built-in compiler, SmartCpp helps you write correct, clean, and maintainable code—faster.
+SmartCpp Analyzer – Smarter C++ Debugging in VS Code
+SmartCpp Analyzer is a powerful Visual Studio Code extension designed to simplify and accelerate your C++ development workflow. From real-time error analysis to guided fixes and a built-in compiler, SmartCpp Analyzer helps you write correct, clean, and maintainable code—faster.
 
 🚀 Features
 🔍 Real-time Error Analysis
