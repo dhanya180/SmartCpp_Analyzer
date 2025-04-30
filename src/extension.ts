@@ -5,10 +5,19 @@ import * as path from 'path';
 import { getDependencyGraphWebviewContent } from './dependencyGraph';
 import { registerSnippetCommands } from './Snippets/commands'; // Ensure this file exists
 
+// Load environment variables from .env file
 require('dotenv').config();
 
+/**
+ * Main extension activation function called by VS Code when extension is activated
+ * @param context - VS Code extension context
+ */
 export function activate(context: vscode.ExtensionContext) {
-    // Register snippet commands and buttons
+
+     // =============================================
+    // Snippet Functionality Setup
+    // =============================================
+     // Create status bar button for snippet operations
     const snippetButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     snippetButton.text = "$(code) Snippets";
     snippetButton.tooltip = "Snippet Operations";
@@ -16,10 +25,17 @@ export function activate(context: vscode.ExtensionContext) {
     snippetButton.show();
     context.subscriptions.push(snippetButton);
 
+    // Register snippet-related commands
     registerSnippetCommands(context);
+
+    // Load environment variables specific to the extension
     require('dotenv').config({ path: path.join(context.extensionPath, '.env') });
     
-    // Verify API key exists
+    // =============================================
+    // API Key Verification
+    // =============================================
+    
+    // Check if Together API key is configured
     if (!process.env.TOGETHER_API_KEY) {
         vscode.window.showErrorMessage(
             "Together API key is missing. Please set TOGETHER_API_KEY in your .env file",
@@ -32,14 +48,25 @@ export function activate(context: vscode.ExtensionContext) {
         return;
     }
 
-    // C++ Analyzer status bar item
+     // =============================================
+    // C++ Code Analysis Functionality
+    // =============================================
+    
+    // Create status bar button for C++ analysis
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
     statusBarItem.text = "$(beaker) Analyze C++";
     statusBarItem.tooltip = "Analyze C++ Code";
     statusBarItem.command = "extension.analyzeCode";
     statusBarItem.show();
 
-    // Register the C++ code analyzer command
+    /**
+     * Register command for analyzing C++ code
+     * This command:
+     * 1. Compiles the current C++ file
+     * 2. Runs the compiled program
+     * 3. Displays results in a webview panel
+     * 4. Provides options to fix errors via AI
+     */
     let analyzeCommand = vscode.commands.registerCommand('extension.analyzeCode', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -51,12 +78,13 @@ export function activate(context: vscode.ExtensionContext) {
         const code = document.getText();
         const filePath = document.fileName;
 
+         // Show status bar message while analyzing
         const statusMessage = vscode.window.setStatusBarMessage('Analyzing code...');
 
         try {
             const outputPath = path.join(path.dirname(filePath), 'a.out');
             
-            // Compile the code
+            // Step 1: Compile the code using g++
             const { error, stderr } = await new Promise<{ error: Error | null, stderr: string }>((resolve) => {
                 exec(`g++ "${filePath}" -o "${outputPath}"`, (error, stdout, stderr) => {
                     resolve({ error, stderr });
@@ -66,6 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
             statusMessage.dispose();
             vscode.window.showInformationMessage('Analysis complete.');
 
+             // Create webview panel to display results
             const panel = vscode.window.createWebviewPanel(
                 'analysisResult',
                 'Analysis Result',
@@ -75,10 +104,10 @@ export function activate(context: vscode.ExtensionContext) {
                     retainContextWhenHidden: true
                 }
             );
-
+            // Clean error message and sanitize code for HTML display
             const errorMsg = cleanErrorMessage(stderr || (error ? error.message : ''));
             const sanitizedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
+             // Handle compilation errors
             if (error || stderr) {
                 // Show compilation error view
                 panel.webview.html = getWebviewContent(
@@ -90,9 +119,10 @@ export function activate(context: vscode.ExtensionContext) {
                     'Error Message'
                 );
 
-                // Handle webview messages
+                // Set up message handlers for the webview
                 panel.webview.onDidReceiveMessage(async (message) => {
                     if (message.command === 'openFile') {
+                        // Handle file opening requests from webview
                         const filePath = message.filePath;
                         const fileUri = vscode.Uri.file(filePath);
                         vscode.workspace.openTextDocument(fileUri).then(doc => {
@@ -122,7 +152,9 @@ export function activate(context: vscode.ExtensionContext) {
                         }
                     }
                     else if (message.command === 'getFixSteps') {
+                         // Handle request to get fix steps from AI
                         try {
+                            // Handle request to get error explanation from AI
                             const fixSteps = await getFixStepsFromScript(context, code, errorMsg);
                             panel.webview.postMessage({
                                 command: 'updateFixSteps',
@@ -157,7 +189,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 });
             } else {
-                // Run the compiled program
+               // If compilation succeeded, run the program
                 const { error: runError, stdout, stderr: runStderr } = await new Promise<{ 
                     error: Error | null, 
                     stdout: string, 
@@ -170,6 +202,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                 let runErrorMsg = cleanErrorMessage(runStderr || (runError ? runError.message : ''));
                 const hasRuntimeErrors = runErrorMsg !== 'No errors detected';
+               // If runtime errors occurred, get GDB backtrace
                 if (hasRuntimeErrors) {
                     const gdbOutput = await new Promise<string>((resolve) => {
                         exec(`gdb -batch -ex "run" -ex "bt full" --args "${outputPath}"`, (error, stdout, stderr) => {
@@ -180,6 +213,8 @@ export function activate(context: vscode.ExtensionContext) {
                     // Combine the original error message with GDB output
                     runErrorMsg = `${runErrorMsg}\n\nGDB Backtrace:\n${gdbOutput}`;
                 }
+
+                // Show results in webview
                 panel.webview.html = getWebviewContent(
                     'Successful Compilation',
                     hasRuntimeErrors ? runErrorMsg : stdout || 'No output',
@@ -189,7 +224,7 @@ export function activate(context: vscode.ExtensionContext) {
                     hasRuntimeErrors ? 'Runtime Error' : 'Program Output'
                 );
 
-                // Handle webview messages for runtime errors
+                // Set up message handlers for runtime errors
                 if (hasRuntimeErrors) {
                     panel.webview.onDidReceiveMessage(async (message) => {
                         if (message.command === 'fixedCode') {
@@ -261,7 +296,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // Register dependency graph command
+    // =============================================
+    // Dependency Graph Functionality
+    // =============================================
+    
+    /**
+     * Command to show C++ file dependency graph
+     * Scans the workspace for .cpp and .h files and builds a dependency graph
+     */
     let depCommand = vscode.commands.registerCommand('extension.showDependencyGraph', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -271,12 +313,14 @@ export function activate(context: vscode.ExtensionContext) {
     
         const currentFile = editor.document.fileName;
         const folder = path.dirname(currentFile);
-    
+
+        // Find all C++ files in workspace
         const cppFiles = await vscode.workspace.findFiles('**/*.cpp');
         const hFiles = await vscode.workspace.findFiles('**/*.h');
     
         const files = [...cppFiles, ...hFiles].map(uri => uri.fsPath);
-    
+
+        // Build dependency map by parsing #include directives
         const dependencyMap: { [key: string]: string[] } = {};
     
         for (const file of files) {
@@ -293,7 +337,8 @@ export function activate(context: vscode.ExtensionContext) {
                 console.error(`Error reading file ${file}: ${err}`);
             }
         }
-    
+
+        // Create webview panel for dependency graph
         const panel = vscode.window.createWebviewPanel(
             'dependencyGraph',
             'C++ File Dependency Graph',
@@ -304,7 +349,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         );
     
-        // Register message handler for the panel
+        // Handle messages from webview (e.g., file opening requests)
         panel.webview.onDidReceiveMessage(message => {
             if (message.command === 'openFile') {
                 const filePath = message.filePath;
@@ -322,14 +367,12 @@ export function activate(context: vscode.ExtensionContext) {
                     });
             }
         });
-    
+
+        // Set webview content with the dependency graph visualization
         panel.webview.html = await getDependencyGraphWebviewContent(dependencyMap);
     });
 
-    // Add command for class dependency analysis using network visualization
-    
-    
-    // Status bar item for dependency graph
+     // Create status bar button for dependency graph
     const depGraphButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 98);
     depGraphButton.text = "$(references) Show Dependencies";
     depGraphButton.tooltip = "Show C++ File Dependencies";
@@ -337,12 +380,22 @@ export function activate(context: vscode.ExtensionContext) {
     depGraphButton.show();
     
     
-
+// Register all commands and disposables
     context.subscriptions.push(analyzeCommand, depCommand, depGraphButton);
 }
 
+// =============================================
+// Helper Functions
+// =============================================
+
+/**
+ * Generates HTML content for network visualization of class dependencies
+ * @param graph - Object containing nodes and edges for the graph
+ * @returns HTML string for the webview
+ */
 // Network webview content is only used for class dependencies, not file dependencies
 function getNetworkWebviewContent(graph: { nodes: any[]; edges: any[] }): string {
+    // Returns HTML template using vis.js for network visualization
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -383,10 +436,18 @@ function getNetworkWebviewContent(graph: { nodes: any[]; edges: any[] }): string
 </html>`;
 }
 
+/**
+ * Gets fixed code from external script using AI
+ * @param context - Extension context
+ * @param code - Original code
+ * @param errorMsg - Error message to fix
+ * @returns Promise resolving to fixed code
+ */
 async function getFixedCodeFromScript(context: vscode.ExtensionContext, code: string, errorMsg: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(context.extensionPath, 'out', 'fixedcode.js');
-        
+
+        // Spawn child process to run the script
         const child = spawn('node', [scriptPath], {
             stdio: ['pipe', 'pipe', 'pipe'],
             env: {
@@ -395,6 +456,7 @@ async function getFixedCodeFromScript(context: vscode.ExtensionContext, code: st
             }
         });
 
+        // Send input data to the script
         const inputData = JSON.stringify({ code, error: errorMsg });
         child.stdin.write(inputData);
         child.stdin.end();
@@ -402,6 +464,7 @@ async function getFixedCodeFromScript(context: vscode.ExtensionContext, code: st
         let result = '';
         let errorOutput = '';
 
+        // Collect output from script
         child.stdout.on('data', (data) => {
             result += data.toString();
         });
@@ -410,6 +473,7 @@ async function getFixedCodeFromScript(context: vscode.ExtensionContext, code: st
             errorOutput += data.toString();
         });
 
+        // Handle script completion
         child.on('close', (code) => {
             if (code === 0) {
                 resolve(result);
@@ -424,10 +488,18 @@ async function getFixedCodeFromScript(context: vscode.ExtensionContext, code: st
     });
 }
 
+/**
+ * Gets steps to fix code from external script using AI
+ * @param context - Extension context
+ * @param code - Original code
+ * @param errorMsg - Error message to fix
+ * @returns Promise resolving to fix steps
+ */
 async function getFixStepsFromScript(context: vscode.ExtensionContext, code: string, errorMsg: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(context.extensionPath, 'out', 'indexfixxy.js');
-        
+
+         // Similar to getFixedCodeFromScript but for fix steps
         const child = spawn('node', [scriptPath], {
             stdio: ['pipe', 'pipe', 'pipe'],
             env: {
@@ -465,10 +537,18 @@ async function getFixStepsFromScript(context: vscode.ExtensionContext, code: str
     });
 }
 
+/**
+ * Gets error explanation from external script using AI
+ * @param context - Extension context
+ * @param code - Original code
+ * @param errorMsg - Error message to explain
+ * @returns Promise resolving to explanation
+ */
 async function getErrorExplanationFromScript(context: vscode.ExtensionContext, code: string, errorMsg: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(context.extensionPath, 'out', 'index2.js');
-        
+
+         // Similar to getFixedCodeFromScript but for error explanations
         const child = spawn('node', [scriptPath], {
             stdio: ['pipe', 'pipe', 'pipe'],
             env: {
@@ -506,6 +586,12 @@ async function getErrorExplanationFromScript(context: vscode.ExtensionContext, c
     });
 }
 
+/**
+ * Recursively parses #include directives to build dependency graph
+ * @param filePath - Path to start parsing from
+ * @param visited - Set of already visited files to avoid cycles
+ * @returns Map of file paths to their dependencies
+ */
 function parseIncludes(filePath: string, visited = new Set<string>()): Map<string, string[]> {
     const graph = new Map<string, string[]>();
     if (visited.has(filePath)) return graph;
@@ -518,12 +604,14 @@ function parseIncludes(filePath: string, visited = new Set<string>()): Map<strin
     const dir = path.dirname(filePath);
     const children: string[] = [];
 
+    // Process each include directive
     includes.forEach(line => {
         const match = line.match(/#include\s*["<](.*)[">]/);
         if (match) {
             const included = match[1];
             const fullPath = path.resolve(dir, included);
             children.push(fullPath);
+            // Recursively parse included files
             const subGraph = parseIncludes(fullPath, visited);
             subGraph.forEach((v, k) => graph.set(k, v));
         }
@@ -533,14 +621,28 @@ function parseIncludes(filePath: string, visited = new Set<string>()): Map<strin
     return graph;
 }
 
+/**
+ * Cleans up compiler error messages for display
+ * @param errorMessage - Raw error message
+ * @returns Cleaned error message
+ */
 function cleanErrorMessage(errorMessage: string): string {
     if (!errorMessage) return "No errors detected";
     return errorMessage
-        .replace(/\/.?(\/|\\)(.?\.cpp):/g, '')
-        .replace(/\n+/g, '\n')
+        .replace(/\/.?(\/|\\)(.?\.cpp):/g, '') // Remove file paths
+        .replace(/\n+/g, '\n') // Remove extra newlines
         .trim();
 }
-
+/**
+ * Generates HTML content for the analysis results webview
+ * @param title - Panel title
+ * @param message - Main message/content
+ * @param code - Original code (optional)
+ * @param errorMsg - Error message (optional)
+ * @param showButtons - Whether to show AI action buttons
+ * @param outputTitle - Title for output section
+ * @returns HTML string for the webview
+ */
 function getWebviewContent(
     title: string,
     message: string,
@@ -552,7 +654,11 @@ function getWebviewContent(
     const isRuntimeError = outputTitle === 'Runtime Error';
     // Only show errorMsg in runtime errors section if it's different from the main message
     const showSeparateErrorSection = errorMsg && errorMsg !== message && errorMsg !== 'No errors detected';
-    
+     // Returns a complete HTML template with:
+    // - Code display with syntax highlighting
+    // - Error/output display
+    // - Interactive buttons for AI features
+    // - Sections for displaying AI responses
     return `
     <!DOCTYPE html>
     <html>
@@ -686,11 +792,13 @@ function getWebviewContent(
         
         <script>
             const vscode = acquireVsCodeApi();
-            
+
+            // Set up button event handlers
             document.getElementById('fixedCodeBtn').addEventListener('click', () => {
                 vscode.postMessage({ command: 'fixedCode' });
             });
-            
+
+            // Set up copy button for fixed code
             document.getElementById('fixStepsBtn').addEventListener('click', () => {
                 vscode.postMessage({ command: 'getFixSteps' });
             });
@@ -714,6 +822,7 @@ function getWebviewContent(
                 }
             });
 
+            // Handle messages from extension (AI responses)
             window.addEventListener('message', event => {
                 const message = event.data;
                 if (message.command === 'updateFixedCode') {
@@ -755,5 +864,7 @@ function getWebviewContent(
     </body>
     </html>`;
 }
-
+/**
+ * Extension deactivation hook (empty in this case)
+ */
 export function deactivate() {}
