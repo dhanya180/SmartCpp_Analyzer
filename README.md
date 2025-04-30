@@ -1,5 +1,5 @@
 # SmartCpp
-** To use this extension, Download the "SmartCpp" in VSCode Extenstions.
+** To use this extension, Download the "SmartCpp Analyzer" in VSCode Extenstions.
 ![image](https://github.com/user-attachments/assets/52fae977-4f1b-4d85-af6e-1468b4a8255c)
 
 
